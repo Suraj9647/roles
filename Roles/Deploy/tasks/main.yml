@@ -1,0 +1,48 @@
+---
+  - name: Update Yum package manager repositories cache
+    become: true
+    yum:
+      update_cache: yes
+  - name: Install OpenJDK Java
+    yum:
+      name: java
+      state: present
+
+  - name: Download Tomcat
+    get_url: url=https://mirrors.estointernet.in/apache/tomcat/tomcat-9/v9.0.38/bin/apache-tomcat-9.0.38.tar.gz dest=/root
+  - name: Extract the file downloaded tomcat file
+    unarchive:
+      src: "/root/apache-tomcat-9.0.38.tar.gz"
+      dest: /root
+  - name: Move the Tomcat directory to a smaller one
+    command: mv /root/apache-tomcat-9.0.38 /root/tomcat9
+  - name: remove the Tomcat zip file
+    command: rm -rf /root/apache-tomcat-9.0.38.tar.gz
+  - name: change port
+    template:
+      src: /etc/ansible/roles/deploy/vars/server.xml.j2
+      dest: /root/tomcat9/conf/server.xml
+  - name: updating user and role
+    template:
+      src: /etc/ansible/roles/deploy/vars/tomcat-users.xml
+      dest: /root/tomcat9/conf/tomcat-users.xml
+  - name: updating manger xml
+    template:
+      src: /etc/ansible/roles/deploy/vars/context-manager.xml
+      dest: /root/tomcat9/webapps/manager/META-INF/context.xml
+  - name: updating host-manager
+    template:
+      src: /etc/ansible/roles/deploy/vars/context-hostmanager.xml
+      dest: /root/tomcat9/webapps/host-manager/META-INF/context.xml
+  - name: Start Tomcat
+    shell: nohup /root/tomcat9/bin/startup.sh &
+  - name: Stop Tomcat
+    shell: nohup /root/tomcat9/bin/shutdown.sh &
+  - name: copy war file
+    copy:
+      src: "{{ item }}"
+      dest: /root/tomcat9/webapps/
+    with_fileglob:
+      - /root/my-app/target/*.war
+  - name: Start Tomcat
+    shell: nohup /root/tomcat9/bin/startup.sh &

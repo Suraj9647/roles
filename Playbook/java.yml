@@ -1,0 +1,13 @@
+---
+- hosts: webservers
+  become: true
+  roles:
+  - apache
+
+- hosts: all
+  become: true
+  roles:
+  - deploy
+
+  vars:
+    tomcat_port: 9090

@@ -1,0 +1,95 @@
+ansible without roles                                                                                       ||||||
+
+
+default configuration file location= /etc/ansible/ansible.cfg
+default host file location= /etc/ansible/hosts
+
+
+Ansible master:
+
+- yum update -y
+- yum install ansible -y
+- sudo su -
+- vim /root/suraj.pem
+- vim /etc/ansible/hosts
+- ansible all -m ping
+- ansible all -m yum -a 'name=git state=present' --become
+
+
+- ansible all -m service -a 'name=httpd state=started' --become
+
+
+=====hosts====
+
+/etc/ansible/hosts
+
+[webservers]
+web01 ansible_host=
+web02 ansible_host=
+
+[webservers:vars]
+ansible_user=ec2-user
+ansible_connection=ssh
+ansible_ssh_private_key_file=/root/suraj.pem
+#make sure to copy the pem file to above location
+ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
+
+
+[group2]
+grp1 ansible_host=x.x.x.x
+grp2 ansible_host=x.x.x.y
+
+
+[group2:vars]
+ansible_user=ec2-user
+ansible_connection=ssh
+ansible_ssh_private_key_file=/root/newpem.pem
+ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
+
+
+- vim nginx.yml
+
+- name: Install nginx
+  hosts: webservers
+  become: true
+
+  tasks:
+  - name: Add epel-release repo
+    ignore_errors: yes
+    yum:
+      name: epel-release
+      state: present
+
+  - name: Install nginx
+    yum:
+      pkg: nginx
+      state: present
+
+  - name: Insert Index Page
+    template:
+      src: /root/index.html
+      dest: /usr/share/nginx/html/index.html
+
+  - name: Start NGiNX
+    service:
+      name: nginx
+      state: started
+
+=====================================
+create a file index.html in the given location in source(src)
+
+
+- vim index.html
+
+<h1>sample text here<h1>
+
+
+sudo amazon-linux-extras enable nginx1
+=========================
+
+how to run ansible playbook
+
+- ansible-playbook nginx.yml
+
+
+
