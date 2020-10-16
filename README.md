@@ -1,6 +1,6 @@
 Ansible:
 
-Ansible without roles                                                                                       |||
+Ansible without roles                                                                                      
 
 
 default configuration file location= /etc/ansible/ansible.cfg
