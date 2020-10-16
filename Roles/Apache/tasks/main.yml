@@ -1,0 +1,33 @@
+---
+- name: Install Git
+  yum:
+    name: git
+    state: present
+- name: Update Yum package manager repositories cache
+  become: true
+  yum:
+    update_cache: yes
+
+- name: Install OpenJDK Java
+  yum:
+    name: java
+    state: present
+
+- name: Clone a repo with separate git directory
+  git:
+    repo: https://github.com/avil172/my-app
+    dest: /root/my-app
+- name: download maven
+  get_url: url=http://apachemirror.wuchna.com/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz dest=/root
+- name: Extract the file downloaded Maven file
+  unarchive:
+    src: "/root/apache-maven-3.6.3-bin.tar.gz"
+    dest: /root
+- name: Move the Maven directory to a smaller one
+  command: mv /root/apache-maven-3.6.3 /root/maven3
+- name: remove the Maven zip file
+  command: rm -rf /root/apache-maven-3.6.3-bin.tar.gz
+- name: build war file
+  command: "/root/maven3/bin/mvn package"
+  args:
+    chdir: /root/my-app

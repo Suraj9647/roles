@@ -1,0 +1,16 @@
+---
+- hosts: webservers
+  become: true
+  tasks:
+  vars_files:
+    -  vault-pass.yml
+    
+  - name: Install Git
+    yum:
+      name: git
+      state: present
+
+  - name: Clone a private git repo with ansible vault
+    git:
+      repo: https://user name:{{password}}@github.com/avil172/my-app
+      dest: /root/my-app
